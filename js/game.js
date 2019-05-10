@@ -20,6 +20,8 @@ defaultEmptyColor = '#000080'                   // Цвет заполненно
 defaultFullColor = '#B0E0E6'                    // Цвет пустой ячейки поля
 gameOver = false                                // Признак конца игры
 
+defaultScoresValue = 100
+
 var soundKeyDownPress                           // Звук нажатия кнопки вниз
 var soundKeyOtherPress                          // Звук нажатия других кнопок
 var soundLoose                                  // Звук конца игры
@@ -125,7 +127,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
         // Если линия заполнена
         if (counter == fieldWidthInTiles) {
             // Нарастим очки игрока
-            scores = scores + 100
+            scores = scores + defaultScoresValue
             // Удалим линию
             for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
                 gameField[currentRow][currentColumn] = 0
@@ -133,6 +135,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
             // Перерисуем линию
             drawRowsAndCellsInTheField(2, currentRow);
             soundWin.play()
+            M.toast({html: `Линия убрана! <br> Вы получили + ${defaultScoresValue} очков!`})
         }
     }
 
