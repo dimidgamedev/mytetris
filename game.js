@@ -2,16 +2,19 @@ canvasObject = document.getElementById('canvas')
 contextObject = canvasObject.getContext('2d')
 scoresElement = document.getElementById('scores')
 blocksElement = document.getElementById('blocks')
+
 scores = 0
 blocks = 0
-fieldWidthInTiles = 10; 
-fieldHeightInTails = 20; 
-columnProportion = 30; 
-xCoordinate = 3; 
-yCoordinate = -1; 
-tm = 0; 
-dwn=0;
-cell=[];
+fieldWidthInTiles = 10 
+fieldHeightInTails = 20
+columnProportion = 30
+xCoordinate = 3 
+yCoordinate = -1
+timeToMoveBlockDown = 0
+timeToMoveBlockDownLimit = 20
+down = 0
+gameField = []
+defaultColor = '#000'
 
 blockShapeMatrix = [
     '00001111',
@@ -23,51 +26,75 @@ blockShapeMatrix = [
     '01100011'
 ];
 
+/**
+ * Устанавливаем начальное заполнение игрового поля
+ *
+ */
 const setInitialFieldState = () => {
-    for (r=0; r < fieldHeightInTails; r++) {
-        cell[r] = [];
-        for (c = 0; c < fieldWidthInTiles; c++) {
-            cell[r][c] = 0;
+    // Пройдемся по строчкам поля
+    for (let currentRow=0; currentRow < fieldHeightInTails; currentRow++) {
+        // Заполним поле как пустой массив
+        gameField[currentRow] = [];
+        // Пройдемся по колонкам в каждой строке поля
+        for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
+            // Заполним пустыми ячейками в строке
+            gameField[currentRow][currentColumn] = 0;
         }
     }
 }
 
 /**
- * Generate new random block
+ * Генерируем новый блок для игры
  *
- * @returns
+ * @returns Новый сгенерированный случайным образом блок
  */
 function generateNewBlock() {
     blocks++;
-    return('0000'+blockShapeMatrix[Math.floor(Math.random()*7)]+'0000');
+    let generatedBlockShape = '0000'+blockShapeMatrix[Math.floor(Math.random()*7)]+'0000';
+    return(generatedBlockShape);
 } 
 
 /**
- * Draw rows in Context
+ * Прорисовываем поле
  *
- * @param {*} type
- * @param {*} row
+ * @param {*} type Тип операции
+ * @param {*} row  Строка
  */
-const drawRows = (type, row) => {
-    for (currentRow = 0; currentRow < fieldHeightInTails; currentRow++) {
+const drawRowsAndCellsInTheField = (type, row) => {
+    // Проход по горизонталям поля 
+    for (let currentRow = 0; currentRow < fieldHeightInTails; currentRow++) {
         let counter = 0;
-        for (currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
+        // Проход по вертикалям поля
+        for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
             contextObject.fillStyle = "#ddd"
-
-            if (cell[currentRow][currentColumn]) {
-                contextObject.fillStyle = "#000"
+            //  Заполним текущую ячейку поля пустым значением 
+            if (gameField[currentRow][currentColumn]) {
+                contextObject.fillStyle = defaultColor
                 counter ++
             }
-            contextObject.fillRect(currentColumn * columnProportion, currentRow * columnProportion, columnProportion - 1, columnProportion - 1);
+            // Зарисуем квадрат фигур
+            contextObject.fillRect(
+                currentColumn * columnProportion,
+                currentRow * columnProportion, 
+                columnProportion - 1, 
+                columnProportion - 1
+            );
+            
             if (type == 2 && fieldHeightInTails - currentRow < row + 1) {
-                cell[fieldHeightInTails-currentRow][currentColumn] = cell[fieldHeightInTails-currentRow-1][currentColumn]
+                gameField[fieldHeightInTails-currentRow][currentColumn] = gameField[fieldHeightInTails-currentRow-1][currentColumn]
             }
         }
+
+        // Если линия заполнена
         if (counter == fieldWidthInTiles) {
-            // Fill one line
+            // Нарастим очки игрока
             scores ++
-            for (currentColumn=0;currentColumn<fieldWidthInTiles;currentColumn++) cell[currentRow][currentColumn] = 0;
-            drawRows(2, currentRow);
+            // Удалим линию
+            for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
+                gameField[currentRow][currentColumn] = 0
+            }
+            // Перерисуем линию
+            drawRowsAndCellsInTheField(2, currentRow);
         }
     }
 }
@@ -76,48 +103,86 @@ const drawRows = (type, row) => {
  * Check field and redraw context
  *
  * @param {*} type
- * @param {number} [n=0]
+ * @param {number} [number=0]
  */
-const checkField = (type,n=0) => {
+const checkField = (type, number = 0) => {
     out = '';
     fnd = 0;
-    for ( r= 0; r < 4; r++) {
-        for (c=0;c<4;c++) {
-            if (csh[c+r*4]==1) {
-                if (type==1) {
-                    contextObject.fillStyle = '#000';
-                    contextObject.fillRect(c*columnProportion+xCoordinate*columnProportion,r*columnProportion+yCoordinate*columnProportion,columnProportion-1,columnProportion-1);
+    // Проход по горизонталям блока 
+    for (let currentRow = 0; currentRow < 4; currentRow++) {
+        // Проход по вертикалям блока
+        for (let currentColumn = 0; currentColumn < 4; currentColumn++) {
+            if (incomingBlock[currentColumn + currentRow * 4] == 1) {
+                // Зарисуем в соответствии с типом
+                if (type == 1) {
+                    contextObject.fillStyle = defaultColor
+                    contextObject.fillRect(
+                        currentColumn * columnProportion + xCoordinate * columnProportion,
+                        currentRow * columnProportion + yCoordinate * columnProportion,
+                        columnProportion - 1, columnProportion-1
+                    )
                 }
-                if (type==2) if (r+yCoordinate>fieldHeightInTails-2||cell[r+yCoordinate+1][c+xCoordinate]==1) {
-                    checkField(3);csh = generateNewBlock();xCoordinate=3;yCoordinate=-1;dwn=0;
+                if (type == 2) {
+                    if (currentRow + yCoordinate > fieldHeightInTails - 2 || gameField[currentRow + yCoordinate + 1][currentColumn + xCoordinate] == 1) {
+                        checkField(3);
+                        incomingBlock = generateNewBlock();
+                        xCoordinate=3;
+                        yCoordinate=-1;
+                        down=0;
+                    }
                 }
-                if (type==3) cell[r+yCoordinate][c+xCoordinate] = 1;
-                if (type==5) if ((c+xCoordinate>fieldWidthInTiles-2&&n==1)||(c+xCoordinate<1&&n==-1)) fnd = 1;
+                if (type == 3) {
+                    gameField[currentRow + yCoordinate][currentColumn + xCoordinate] = 1
+                }
+                if (type == 5) {
+                    if ((currentColumn + xCoordinate > fieldWidthInTiles - 2 && number == 1) || (currentColumn + xCoordinate < 1 && number == -1)) {
+                        fnd = 1
+                    }
+                }
             }
-            if (type==4) out += csh[r+(3-c)*4];
+            if (type==4) {
+                out += incomingBlock[currentRow + (3 - currentColumn) * 4]
+            }
         }
     }
-    csh = type==4 ? out : csh;
-    if (!fnd) xCoordinate += n;
+    incomingBlock = type==4 ? out : incomingBlock;
+    if (!fnd) {
+        xCoordinate += number
+    }
 }
 
+// Сгенерируем начальный блок
+incomingBlock = generateNewBlock()
+
+// Инициализируемо игровое поле
+setInitialFieldState()
+
+/**
+ * Основной игровой цикл
+ *
+ */
 const game = () => {
-    tm++;
-    if (tm > 20 || dwn) {
+    // Увеличим счетчик для отсчета времени
+    timeToMoveBlockDown++;
+    // Если счетчик превысил установленный предел
+    if (timeToMoveBlockDown > timeToMoveBlockDownLimit || down) {
+        // Нарастим координату на 1 вниз
         yCoordinate++;
-        tm = 0;
+        // Обновим счетчик для отсчета времени
+        timeToMoveBlockDown = 0;
+        // Проверим поле
         checkField(2);
     }
-    drawRows(1,0);
+    // Перерисуем поле по новым параметрам
+    drawRowsAndCellsInTheField(1,0);
+    // Проверим еще раз
     checkField(1);
+    // Перерисуем результаты игрока на главной странице
     scoresElement.innerHTML = scores;
     blocksElement.innerHTML = blocks;
 }
 
-csh = generateNewBlock()
-
-setInitialFieldState()
-
+// Зададим интервал срабатывания основной игровой функции
 setInterval(game,33);
 
 /**
@@ -141,7 +206,7 @@ const processKeyCodes = (evt) => {
             break;
         case 40:
             // Press DOWN Key -> Move down (drop)
-            dwn = 1;
+            down = 1;
             break;
     }
 }
