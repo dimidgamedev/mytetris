@@ -1,32 +1,37 @@
 // Получим объекты из основной страницы игры
-canvasObject = document.getElementById('canvas')
-contextObject = canvasObject.getContext('2d')
-scoresElement = document.getElementById('scores')
-blocksElement = document.getElementById('blocks')
+canvasObject = document.getElementById('canvas')        // Элемент разметки для рисования
+contextObject = canvasObject.getContext('2d')           // Контекст элемента для рисования
+scoresElement = document.getElementById('scores')       // Элемент разметки для отображения набранных очков
+blocksElement = document.getElementById('blocks')       // Элемент разметки для отображения счетчика блоков
 
 // Начальные значения переменных
-scores = 0                                      // Очки игрока
-blocks = 0                                      // Количество упавших блоков
-fieldWidthInTiles = 10                          // Ширина игрового поля в блоках
-fieldHeightInTails = 20                         // Высота игрового поля в блоках
-columnProportion = 30                           // Пропорции одного блока в пикселях
-xCoordinate = 3                                 // Кордината Х блока
-yCoordinate = -1                                // Координата У блока   
-timeToMoveBlockDown = 0                         // Счетчик для управления движением ВНИЗ
-timeToMoveBlockDownLimit = 20                   // Предел счетчика для движения ВНИЗ - Скорость падения блоков
-down = 0                                        // Падаем или нет
-gameField = []                                  // Основной объект - Игровое поле
-defaultEmptyColor = '#000080'                   // Цвет заполненной ячейки поля
-defaultFullColor = '#B0E0E6'                    // Цвет пустой ячейки поля
-gameOver = false                                // Признак конца игры
+scores = 0                                              // Очки игрока
+blocks = 0                                              // Количество упавших блоков
+fieldWidthInTiles = 10                                  // Ширина игрового поля в блоках
+fieldHeightInTails = 20                                 // Высота игрового поля в блоках
+columnProportion = 30                                   // Пропорции одного блока в пикселях
+xCoordinate = 3                                         // Кордината Х блока
+yCoordinate = -1                                        // Координата У блока   
+timeToMoveBlockDown = 0                                 // Счетчик для управления движением ВНИЗ
+timeToMoveBlockDownLimit = 20                           // Предел счетчика для движения ВНИЗ - Скорость падения блоков
+down = 0                                                // Падаем или нет
+gameField = []                                          // Основной объект - Игровое поле
+defaultEmptyColor = '#000080'                           // Цвет заполненной ячейки поля
+defaultFullColor = '#B0E0E6'                            // Цвет пустой ячейки поля
+gameOver = false                                        // Признак конца игры
 
-defaultScoresValue = 100
+defaultScoresValue = 100                                // Значение для прироста очков по умолчанию
 
-var soundKeyDownPress                           // Звук нажатия кнопки вниз
-var soundKeyOtherPress                          // Звук нажатия других кнопок
-var soundLoose                                  // Звук конца игры
-var soundWin                                    // Звук удаления ряда
+var soundKeyDownPress                                   // Звук нажатия кнопки вниз
+var soundKeyOtherPress                                  // Звук нажатия других кнопок
+var soundLoose                                          // Звук конца игры
+var soundWin                                            // Звук удаления ряда
 
+/**
+ * Объект для проигрывания звука
+ *
+ * @param {*} src
+ */
 function sound(src) {
     this.sound = document.createElement("audio");
     this.sound.src = src;
@@ -35,13 +40,17 @@ function sound(src) {
     this.sound.style.display = "none";
     document.body.appendChild(this.sound);
     this.play = function(){
-      this.sound.play();
+        this.sound.play();
     }
     this.stop = function(){
-      this.sound.pause();
+        this.sound.pause();
     }
-  }
+}
 
+
+/**  
+ * Определем объекты разных звуков 
+ */
 soundKeyDownPress = new sound("./sounds/key.wav");
 soundKeyOtherPress = new sound("./sounds/key_others.wav")
 soundLoose = new sound('./sounds/loose.wav')
@@ -118,7 +127,6 @@ const drawRowsAndCellsInTheField = (type, row) => {
                 columnProportion - 1, 
                 columnProportion - 1
             );
-            
             if (type == 2 && fieldHeightInTails - currentRow < row + 1) {
                 gameField[fieldHeightInTails-currentRow][currentColumn] = gameField[fieldHeightInTails-currentRow-1][currentColumn]
             }
@@ -146,10 +154,13 @@ const drawRowsAndCellsInTheField = (type, row) => {
             finish = true
         }
     }
+    // Если конец игры
     if (finish) {
-        alert(`Игра окончена! \nВы набрали: \n    * очков - ${scores} \n    * блоков - ${blocks} \nДля продолжения перезагрузите страницу.`)
         gameOver = true
+        // Играем музыку
         soundLoose.play()
+        // Выводим результат игры
+        materialAlertGameOver()
     }
 }
 
@@ -244,6 +255,23 @@ const game = () => {
 
 // Зададим интервал срабатывания основной игровой функции
 setInterval(game,33);
+
+const materialAlertGameOver = () => {
+    MaterialDialog.alert(`Ваш результат: очков - ${scores}, блоков - ${blocks}.`,
+        {
+            title: 'Игра окончена!',
+            buttons: {
+                close: {
+                    text: 'Начать заново',
+                    className: 'blue',
+                    callback: () => {
+                        location.reload()
+                    }
+                }
+            }
+        }
+    )
+}
 
 /**
  * Обработаем события от клавиатуры (нажатие клавиш)
