@@ -1,22 +1,32 @@
+// Получим объекты из основной страницы игры
 canvasObject = document.getElementById('canvas')
 contextObject = canvasObject.getContext('2d')
 scoresElement = document.getElementById('scores')
 blocksElement = document.getElementById('blocks')
 
-scores = 0
-blocks = 0
-fieldWidthInTiles = 10 
-fieldHeightInTails = 20
-columnProportion = 30
-xCoordinate = 3 
-yCoordinate = -1
-timeToMoveBlockDown = 0
-timeToMoveBlockDownLimit = 20
-down = 0
-gameField = []
-defaultColor = '#000'
+// Начальные значения переменных
+scores = 0                                      // Очки игрока
+blocks = 0                                      // Количество упавших блоков
+fieldWidthInTiles = 10                          // Ширина игрового поля в блоках
+fieldHeightInTails = 20                         // Высота игрового поля в блоках
+columnProportion = 30                           // Пропорции одного блока в пикселях
+xCoordinate = 3                                 // Кордината Х блока
+yCoordinate = -1                                // Координата У блока   
+timeToMoveBlockDown = 0                         // Счетчик для управления движением ВНИЗ
+timeToMoveBlockDownLimit = 20                   // Предел счетчика для движения ВНИЗ - Скорость падения блоков
+down = 0                                        // Падаем или нет
+gameField = []                                  // Основной объект - Игровое поле
+defaultEmptyColor = '#000080'                   // Цвет заполненной ячейки поля
+defaultFullColor = '#B0E0E6'                    // Цвет пустой ячейки поля
 
-blockShapeMatrix = [
+/**  
+ * Заполнение фигуры ведется в виде матрицы в 16 значение белое-черное
+ * Верхняя строка заполняется белым 0000
+ * Середина заполняется случайным образом и временами модифицирует верх или низ
+ * Нижняя строка так же заполняется белым 0000
+*/
+
+blockShapeMatrix = [                            // Основные фигуры в виде матриц белое(0)-черное(1)
     '00001111',
     '01100110',
     '00100111',
@@ -50,7 +60,7 @@ const setInitialFieldState = () => {
  */
 function generateNewBlock() {
     blocks++;
-    let generatedBlockShape = '0000'+blockShapeMatrix[Math.floor(Math.random()*7)]+'0000';
+    let generatedBlockShape = '0000'+blockShapeMatrix[Math.floor(Math.random() * 7)]+'0000';
     return(generatedBlockShape);
 } 
 
@@ -66,10 +76,10 @@ const drawRowsAndCellsInTheField = (type, row) => {
         let counter = 0;
         // Проход по вертикалям поля
         for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
-            contextObject.fillStyle = "#ddd"
+            contextObject.fillStyle = defaultFullColor
             //  Заполним текущую ячейку поля пустым значением 
             if (gameField[currentRow][currentColumn]) {
-                contextObject.fillStyle = defaultColor
+                contextObject.fillStyle = defaultEmptyColor
                 counter ++
             }
             // Зарисуем квадрат фигур
@@ -100,10 +110,10 @@ const drawRowsAndCellsInTheField = (type, row) => {
 }
 
 /**
- * Check field and redraw context
+ * Проверим поле блока с определенным номером
  *
- * @param {*} type
- * @param {number} [number=0]
+ * @param {*} type Тип
+ * @param {number} [number=0] Номер
  */
 const checkField = (type, number = 0) => {
     out = '';
@@ -115,7 +125,7 @@ const checkField = (type, number = 0) => {
             if (incomingBlock[currentColumn + currentRow * 4] == 1) {
                 // Зарисуем в соответствии с типом
                 if (type == 1) {
-                    contextObject.fillStyle = defaultColor
+                    contextObject.fillStyle = defaultEmptyColor
                     contextObject.fillRect(
                         currentColumn * columnProportion + xCoordinate * columnProportion,
                         currentRow * columnProportion + yCoordinate * columnProportion,
@@ -151,10 +161,14 @@ const checkField = (type, number = 0) => {
     }
 }
 
-// Сгенерируем начальный блок
+/**
+ *  Сгенерируем начальный блок
+ */
 incomingBlock = generateNewBlock()
 
-// Инициализируемо игровое поле
+/** 
+ * Инициализируемо игровое поле
+ */
 setInitialFieldState()
 
 /**
@@ -186,30 +200,32 @@ const game = () => {
 setInterval(game,33);
 
 /**
- * Process Keys from keyboard
+ * Обработаем события от клавиатуры (нажатие клавиш)
  *
- * @param {*} evt
+ * @param {*} evt Событие клавиатеры (код клавиши)
  */
 const processKeyCodes = (evt) => {
     switch(evt.keyCode) {
         case 37:
-            // Press LEFT key - > Move left
+            // Нажата клавиша ВЛЕВО
             checkField(5, -1);
             break;
         case 38:
-            // Press UP Key -> Rotate
+            // Нажата клавиша ВВЕРХ
             checkField(4);
             break;
         case 39:
-            // Press RIGHT Key -> Mode right
+            // Нажата клавиша ВПРАВО
             checkField(5, 1);
             break;
         case 40:
-            // Press DOWN Key -> Move down (drop)
+            // Нажата клавиша ВНИЗ
             down = 1;
             break;
     }
 }
 
-// Add event listener to process keyboard keys
+/** 
+ * Назначим событие обработки нажатых клавиш
+ */
 document.addEventListener('keydown', processKeyCodes);
