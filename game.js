@@ -19,6 +19,8 @@ gameField = []                                  // Основной объект
 defaultEmptyColor = '#000080'                   // Цвет заполненной ячейки поля
 defaultFullColor = '#B0E0E6'                    // Цвет пустой ячейки поля
 
+gameOver = false                                // Признак конца игры
+
 /**  
  * Заполнение фигуры ведется в виде матрицы в 16 значение белое-черное
  * Верхняя строка заполняется белым 0000
@@ -107,6 +109,18 @@ const drawRowsAndCellsInTheField = (type, row) => {
             drawRowsAndCellsInTheField(2, currentRow);
         }
     }
+
+    // Если заполнена вертикаль (достаточно пройтись по верхнему полю)
+    let finish = false
+    for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
+        if (gameField[0][currentColumn] == 1) {
+            finish = true
+        }
+    }
+    if (finish) {
+        alert(`Игра окончена! \nВы набрали: \n    * очков - ${scores} \n    * блоков - ${blocks} \nДля продолжения перезагрузите страницу.`)
+        gameOver = true
+    }
 }
 
 /**
@@ -176,24 +190,26 @@ setInitialFieldState()
  *
  */
 const game = () => {
-    // Увеличим счетчик для отсчета времени
-    timeToMoveBlockDown++;
-    // Если счетчик превысил установленный предел
-    if (timeToMoveBlockDown > timeToMoveBlockDownLimit || down) {
-        // Нарастим координату на 1 вниз
-        yCoordinate++;
-        // Обновим счетчик для отсчета времени
-        timeToMoveBlockDown = 0;
-        // Проверим поле
-        checkField(2);
+    if (!gameOver) {
+        // Увеличим счетчик для отсчета времени
+        timeToMoveBlockDown++;
+        // Если счетчик превысил установленный предел
+        if (timeToMoveBlockDown > timeToMoveBlockDownLimit || down) {
+            // Нарастим координату на 1 вниз
+            yCoordinate++;
+            // Обновим счетчик для отсчета времени
+            timeToMoveBlockDown = 0;
+            // Проверим поле
+            checkField(2);
+        }
+        // Перерисуем поле по новым параметрам
+        drawRowsAndCellsInTheField(1,0);
+        // Проверим еще раз
+        checkField(1);
+        // Перерисуем результаты игрока на главной странице
+        scoresElement.innerHTML = scores;
+        blocksElement.innerHTML = blocks;
     }
-    // Перерисуем поле по новым параметрам
-    drawRowsAndCellsInTheField(1,0);
-    // Проверим еще раз
-    checkField(1);
-    // Перерисуем результаты игрока на главной странице
-    scoresElement.innerHTML = scores;
-    blocksElement.innerHTML = blocks;
 }
 
 // Зададим интервал срабатывания основной игровой функции
