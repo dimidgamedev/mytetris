@@ -18,8 +18,33 @@ down = 0                                        // Падаем или нет
 gameField = []                                  // Основной объект - Игровое поле
 defaultEmptyColor = '#000080'                   // Цвет заполненной ячейки поля
 defaultFullColor = '#B0E0E6'                    // Цвет пустой ячейки поля
-
 gameOver = false                                // Признак конца игры
+
+var soundKeyDownPress                           // Звук нажатия кнопки вниз
+var soundKeyOtherPress                          // Звук нажатия других кнопок
+var soundLoose                                  // Звук конца игры
+var soundWin                                    // Звук удаления ряда
+
+function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+      this.sound.play();
+    }
+    this.stop = function(){
+      this.sound.pause();
+    }
+  }
+
+soundKeyDownPress = new sound("./sounds/key.wav");
+soundKeyOtherPress = new sound("./sounds/key_others.wav")
+soundLoose = new sound('./sounds/loose.wav')
+soundWin = new sound('./sounds/win.wav')
+
 
 /**  
  * Заполнение фигуры ведется в виде матрицы в 16 значение белое-черное
@@ -107,6 +132,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
             }
             // Перерисуем линию
             drawRowsAndCellsInTheField(2, currentRow);
+            soundWin.play()
         }
     }
 
@@ -120,6 +146,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
     if (finish) {
         alert(`Игра окончена! \nВы набрали: \n    * очков - ${scores} \n    * блоков - ${blocks} \nДля продолжения перезагрузите страницу.`)
         gameOver = true
+        soundLoose.play()
     }
 }
 
@@ -224,18 +251,22 @@ const processKeyCodes = (evt) => {
     switch(evt.keyCode) {
         case 37:
             // Нажата клавиша ВЛЕВО
+            soundKeyOtherPress.play()
             checkField(5, -1);
             break;
         case 38:
             // Нажата клавиша ВВЕРХ
+            soundKeyOtherPress.play()
             checkField(4);
             break;
         case 39:
             // Нажата клавиша ВПРАВО
+            soundKeyOtherPress.play()
             checkField(5, 1);
             break;
         case 40:
             // Нажата клавиша ВНИЗ
+            soundKeyDownPress.play()
             down = 1;
             break;
     }
