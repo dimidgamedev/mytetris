@@ -125,7 +125,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
         // Если линия заполнена
         if (counter == fieldWidthInTiles) {
             // Нарастим очки игрока
-            scores ++
+            scores = scores + 100
             // Удалим линию
             for (let currentColumn = 0; currentColumn < fieldWidthInTiles; currentColumn++) {
                 gameField[currentRow][currentColumn] = 0

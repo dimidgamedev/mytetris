@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Курсовая работа: Игра Тетрис на JavaScript</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+    <body>
+        <nav>
+            <div class="nav-wrapper blue lighten-1">
+                <a href="#" class="brand-logo center">Tetromino</a>
+                <ul id="nav-mobile" class="left hide-on-med-and-down">
+                    <li><a href="index.html">Играть в Тетрис</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row valign-wrapper">
+                <div class="col s6 offset-s3 valign">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="center-align">
+                                <span class="valign-wrapper hoverable">
+                                    Случайные фигурки тетрамино падают сверху в прямоугольный стакан шириной 10 и 
+                                    высотой 20 клеток. В полёте игрок может поворачивать фигурку на 90° и двигать её 
+                                    по горизонтали. Также можно «сбрасывать» фигурку, то есть ускорять её падение, 
+                                    когда уже решено, куда фигурка должна упасть. 
+                                    Фигурка летит до тех пор, пока не наткнётся на другую фигурку либо на дно стакана. 
+                                    Если при этом заполнился горизонтальный ряд из 10 клеток, он пропадает и всё, 
+                                    что выше него, опускается на одну клетку. 
+                                    Темп игры может постепенно увеличивается. 
+                                    Игра заканчивается, когда новая фигурка не может поместиться в стакан. 
+                                    Игрок получает очки за каждый заполненный ряд, поэтому его задача — заполнять ряды, 
+                                    не заполняя сам стакан (по вертикали) как можно дольше, 
+                                    чтобы таким образом получить как можно больше очков.
+                                    Очки могут начисляться за убранные линии.
+                                    За падающие блоки также увеличиваетс счетчик блоков
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-action">
+                            <div class="row">
+                                <div class="col s12">
+                                    <a href="./index.html" class="brand-logo center">Перейти к игре</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="js/materialize.min.js"></script>
+    </body>
+</html>
