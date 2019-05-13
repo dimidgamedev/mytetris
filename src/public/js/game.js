@@ -51,10 +51,10 @@ function sound(src) {
 /**  
  * Определем объекты разных звуков 
  */
-soundKeyDownPress = new sound("./sounds/key.wav");
-soundKeyOtherPress = new sound("./sounds/key_others.wav")
-soundLoose = new sound('./sounds/loose.wav')
-soundWin = new sound('./sounds/win.wav')
+soundKeyDownPress = new sound("/static/sounds/key.wav");
+soundKeyOtherPress = new sound("/static/sounds/key_others.wav")
+soundLoose = new sound('/static/sounds/loose.wav')
+soundWin = new sound('/static/sounds/win.wav')
 
 
 /**  
@@ -271,6 +271,10 @@ const game = () => {
 // Зададим интервал срабатывания основной игровой функции
 setInterval(game, 33);
 
+/**
+ * Модальное окно для вывода сообщения о кнце игры и статистики
+ *
+ */
 const materialAlertGameOver = () => {
     MaterialDialog.alert(`Ваш результат: очков - ${scores}, блоков - ${blocks}.`,
         {
