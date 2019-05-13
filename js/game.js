@@ -128,6 +128,7 @@ const drawRowsAndCellsInTheField = (type, row) => {
                 columnProportion - 1
             );
             if (type == 2 && fieldHeightInTails - currentRow < row + 1) {
+                // Удаляет заполненную линию из матрицы игрового поля путем перемещения всех блочков выше на уровень ниже
                 gameField[fieldHeightInTails-currentRow][currentColumn] = gameField[fieldHeightInTails-currentRow-1][currentColumn]
             }
         }
@@ -188,24 +189,37 @@ const checkField = (type, number = 0) => {
                     )
                 }
                 if (type == 2) {
+                    // Если блок достиг низа - упал на что-то то мы генерируем новый блок и даем ему координаты верха
                     if (currentRow + yCoordinate > fieldHeightInTails - 2 || gameField[currentRow + yCoordinate + 1][currentColumn + xCoordinate] == 1) {
+                        // Если мы на что-то напоролись
                         checkField(3);
                         incomingBlock = generateNewBlock();
-                        xCoordinate=3;
-                        yCoordinate=-1;
-                        down=0;
+                        xCoordinate = 3;
+                        yCoordinate = -1;
+                        down = 0;
                     }
                 }
                 if (type == 3) {
+                    // Мы на что-то наткнулись - или это самый низ или это часть какаого-то блока
+                    // Мы вливаем этот блок в матрицу игрового поля путем заполнения элементов матрицы поля единицами (1)
+                    // то есть ячейки падающего блока по своим позициям делают ячейки матрицы поля ЗАНЯТЫМИ
+                    // Блок incomingBlock падает как бы НАД матрицей поля пока не встретил препятствие
+                    // После этого он сам становится частью матрицы игрового поля
                     gameField[currentRow + yCoordinate][currentColumn + xCoordinate] = 1
                 }
                 if (type == 5) {
+                    // Нажата клавиша ВЛЕВО или ВПРАВО - нужно перерисовать падающий блок на одоин ряд левее если он не выйдет за пределы поля
+                    // Если number = 0 это ЛЕВО
+                    // Если number = 1 это ПРАВО
                     if ((currentColumn + xCoordinate > fieldWidthInTiles - 2 && number == 1) || (currentColumn + xCoordinate < 1 && number == -1)) {
                         fnd = 1
                     }
                 }
             }
             if (type==4) {
+                // Поворот фигуры при нажатии клавишы ВВЕРХ
+                // Это фактически новая фигура (то есть повернутая старая)
+                // Но двигать пока мы будем над полем именно его
                 out += incomingBlock[currentRow + (3 - currentColumn) * 4]
             }
         }
@@ -235,6 +249,7 @@ const game = () => {
         // Увеличим счетчик для отсчета времени
         timeToMoveBlockDown++;
         // Если счетчик превысил установленный предел
+        // То есть либо мы нажали кнопку ВНИЗ либо пришло время анимации ПАДАТЬ
         if (timeToMoveBlockDown > timeToMoveBlockDownLimit || down) {
             // Нарастим координату на 1 вниз
             yCoordinate++;
@@ -254,7 +269,7 @@ const game = () => {
 }
 
 // Зададим интервал срабатывания основной игровой функции
-setInterval(game,33);
+setInterval(game, 33);
 
 const materialAlertGameOver = () => {
     MaterialDialog.alert(`Ваш результат: очков - ${scores}, блоков - ${blocks}.`,
@@ -298,6 +313,7 @@ const processKeyCodes = (evt) => {
         case 40:
             // Нажата клавиша ВНИЗ
             soundKeyDownPress.play()
+            // Если должен упасть, то в функции game() при перерисовке мы сможем зайти в условие
             down = 1;
             break;
     }
